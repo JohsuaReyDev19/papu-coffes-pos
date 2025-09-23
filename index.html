@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAPU Coffee Shop - POS System</title>
+    <meta name="description" content="Point of Sale system for PAPU Coffee Shop">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f1eb 0%, #e8ddd4 50%, #ddd0c4 100%);
+            min-height: 100vh;
+            color: #2d1810;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            color: #f5f1eb;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 20px rgba(27, 94, 32, 0.25);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .shop-info h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .shop-info p {
+            color: rgba(245, 241, 235, 0.8);
+            font-size: 0.875rem;
+        }
+
+        .header-meta {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            background: rgba(46, 125, 50, 0.15); /* soft green background */
+            border: 1px solid rgba(46, 125, 50, 0.4); /* green border */
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            color: #2e7d32; /* text in green */
+            font-weight: 500;
+        }
+
+
+        /* Main Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Product Section */
+        .product-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(45, 24, 16, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+            background: rgba(232, 221, 212, 0.5);
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-button.active {
+            background: #3d2417;
+            color: #f5f1eb;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-button:hover:not(.active) {
+            background: rgba(61, 36, 23, 0.1);
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f1eb 100%);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(221, 208, 196, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(45, 24, 16, 0.1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(45, 24, 16, 0.15);
+        }
+
+        .product-info h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1b5e20; /* dark green for headings */
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2e7d32; /* strong green for price */
+            margin-bottom: 1rem;
+        }
+
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%); /* green gradient */
+            color: #f5f1eb;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .add-to-cart-btn:hover {
+            background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%); /* brighter green on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.35); /* green shadow */
+            background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%); /* brighter green hover */
+        }
+
+
+        /* Shopping Cart */
+        .cart-section {
+            background: linear-gradient(135deg, #ffffff 0%, rgba(200, 230, 201, 0.4) 100%); /* soft green tint */
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            height: fit-content;
+            box-shadow: 0 4px 20px rgba(27, 94, 32, 0.15); /* greenish shadow */
+        }
+
+
+        .cart-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cart-header h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .cart-badge {
+            background: rgba(200, 230, 201, 0.8); /* light green background */
+            color: #1b5e20; /* dark green text */
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+
+        .cart-items {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: #f5f1eb;
+            border-radius: 0.5rem;
+            border: 1px solid #e8ddd4;
+            margin-bottom: 0.75rem;
+        }
+
+        .cart-item-info h4 {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .cart-item-price {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .quantity-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .quantity-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quantity {
+            width: 32px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+        }
+
+        .cart-summary {
+            border-top: 2px solid #e8ddd4;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-line.total {
+            font-size: 1.125rem;
+            font-weight: bold;
+            border-top: 1px solid #ddd;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%); /* green gradient */
+            color: #f5f1eb;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .checkout-btn:hover {
+            background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%); /* brighter green on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(46, 125, 50, 0.35);
+        }
+
+
+        .checkout-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(46, 125, 50, 0.35); /* greenish glow */
+            background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%); /* brighter green hover */
+        }
+
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #666;
+            padding: 3rem 1rem;
+            font-style: italic;
+        }
+
+        /* Payment Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .modal-total {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #3d2417;
+        }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-method {
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .payment-method:hover {
+            border-color: #2e7d32; /* green border on hover */
+        }
+
+        .payment-method.selected {
+            border-color: #2e7d32; /* green border when selected */
+            background: rgba(46, 125, 50, 0.08); /* subtle green background */
+        }
+
+
+        .payment-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, #3d2417 0%, #2d1810 100%);
+            color: #f5f1eb;
+        }
+
+        .modal-btn.confirm:hover {
+            transform: translateY(-1px);
+        }
+
+        .modal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .header-meta {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .logo img {
+            width: 80px;   /* adjust size */
+            height: auto;  /* keeps aspect ratio */
+            border-radius: 8px; /* optional rounded edges */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <img src="./Screenshot_2025-09-04_230647-removebg-preview.png" alt="">
+                </div>
+                <div class="shop-info">
+                    <h1>PAPU COFFEE SHOP</h1>
+                    <p>Point of Sale System</p>
+                </div>
+            </div>
+            <div class="header-meta">
+                <div>🕕 Open: 12:00 NN - 9:00 PM</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Product Section -->
+        <div class="product-section">
+            <!-- Category Tabs -->
+            <div class="category-tabs">
+                <h3>Selec Menu</h3>
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-category="espresso">
+                        ☕ Espresso Based
+                    </button>
+                    <button class="tab-button" data-category="specialty-coffee">
+                        🌟 Specialty Coffee
+                    </button>
+                    <button class="tab-button" data-category="frappe-espresso">
+                        🍮 Frappe (Espresso)
+                    </button>
+                    <button class="tab-button" data-category="frappe-non-espresso">
+                        🍓 Frappe (Non-Espresso)
+                    </button>
+                    <button class="tab-button" data-category="non-coffee">
+                        🥤 Non-Coffee Drinks
+                    </button>
+                    <button class="tab-button" data-category="refreshments">
+                        🧊 Refreshments
+                    </button>
+                    <button class="tab-button" data-category="croffles">
+                        🥐 Croffles
+                    </button>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="product-grid" id="productGrid">
+                <!-- Products will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Shopping Cart -->
+        <div class="cart-section">
+            <div class="cart-header">
+                <h2>🛒 Order Summary</h2>
+                <span class="cart-badge" id="cartBadge">0 items</span>
+            </div>
+            
+            <div class="cart-items" id="cartItems">
+                <div class="empty-cart">Your cart is empty</div>
+            </div>
+            
+            <div class="cart-summary" id="cartSummary" style="display: none;">
+                <div class="summary-line">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">₱0</span>
+                </div>
+                <div class="summary-line total">
+                    <span>Total:</span>
+                    <span id="total">₱0</span>
+                </div>
+            </div>
+            
+            <button class="checkout-btn" id="checkoutBtn" disabled>
+                Proceed to Payment
+            </button>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✅ Complete Payment</h3>
+                <p>Total amount: <span class="modal-total" id="modalTotal">$0.00</span></p>
+            </div>
+            
+            <div class="payment-methods">
+                <div class="payment-method" data-method="mobile">
+                    <div class="payment-icon">📱</div>
+                    <span>Gcash Payment</span>
+                </div>
+                <div class="payment-method" data-method="cash">
+                    <div class="payment-icon">💵</div>
+                    <span>Cash</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closePaymentModal()">Cancel</button>
+                <button class="modal-btn confirm" id="confirmPaymentBtn" disabled>Complete Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Product Data
+        const products = [
+        // REFRESHMENTS (SPARKLING)
+        { id: 'sparkleberry', name: 'Sparkleberry (16oz)', price: 100, category: 'refreshments' },
+        { id: 'bursting-lychee', name: 'Bursting Lychee (16oz)', price: 100, category: 'refreshments' },
+        { id: 'green-apple', name: 'Green Apple (16oz)', price: 100, category: 'refreshments' },
+        { id: 'blueberry-fizz', name: 'Blueberry Fizz (16oz)', price: 100, category: 'refreshments' },
+        { id: 'mango-tropical', name: 'Mango Tropical (16oz)', price: 110, category: 'refreshments' },
+        { id: 'orange-sunset', name: 'Orange Sunset (16oz)', price: 110, category: 'refreshments' },
+
+        // CROFFLES
+        { id: 'almond-nutella', name: 'Almond Nutella', price: 100, category: 'croffles' },
+        { id: 'nutella-oreo', name: 'Nutella Oreo', price: 100, category: 'croffles' },
+        { id: 'biscoff', name: 'Biscoff', price: 95, category: 'croffles' },
+        { id: 'banana-pb', name: 'Banana Peanut Butter', price: 95, category: 'croffles' },
+        { id: 'strawberry-cream-croffle', name: 'Strawberry Cream', price: 85, category: 'croffles' },
+        { id: 'banoffie', name: 'Banoffie', price: 85, category: 'croffles' },
+
+        // FRAPPE ESPRESSO BASED
+        { id: 'oreo-cheesecake', name: 'Oreo Cheesecake (16oz)', price: 165, category: 'frappe-espresso' },
+        { id: 'caramel-coffee-jelly', name: 'Caramel Coffee Jelly (16oz)', price: 165, category: 'frappe-espresso' },
+        { id: 'almond-mocha', name: 'Almond Mocha (16oz)', price: 165, category: 'frappe-espresso' },
+        { id: 'hazelnut-frappe', name: 'Hazelnut (16oz)', price: 145, category: 'frappe-espresso' },
+
+        // FRAPPE NON-ESPRESSO BASED
+        { id: 'strawberry-cream-frappe', name: 'Strawberry Cream (16oz)', price: 140, category: 'frappe-non-espresso' },
+        { id: 'mixed-berries', name: 'Mixed Berries (16oz)', price: 170, category: 'frappe-non-espresso' },
+        { id: 'matcha-white-choco', name: 'Matcha White Chocolate (16oz)', price: 165, category: 'frappe-non-espresso' },
+        { id: 'salted-caramel-chip', name: 'Salted Caramel Chip (16oz)', price: 140, category: 'frappe-non-espresso' },
+        { id: 'choco-crumble', name: 'Choco Crumble (16oz)', price: 160, category: 'frappe-non-espresso' },
+        { id: 'choco-hazelnut-frappe', name: 'Choco Hazelnut (16oz)', price: 130, category: 'frappe-non-espresso' },
+
+        // NON-COFFEE DRINKS
+        { id: 'matcha-latte-12', name: 'Matcha Latte (12oz)', price: 120, category: 'non-coffee' },
+        { id: 'matcha-latte-16', name: 'Matcha Latte (16oz)', price: 145, category: 'non-coffee' },
+        { id: 'strawberry-matcha-12', name: 'Strawberry Matcha (12oz)', price: 120, category: 'non-coffee' },
+        { id: 'strawberry-matcha-16', name: 'Strawberry Matcha (16oz)', price: 140, category: 'non-coffee' },
+        { id: 'strawberry-milk-12', name: 'Strawberry Milk (12oz)', price: 85, category: 'non-coffee' },
+        { id: 'strawberry-milk-16', name: 'Strawberry Milk (16oz)', price: 99, category: 'non-coffee' },
+        { id: 'merry-mango-12', name: 'Merry Mango (12oz)', price: 85, category: 'non-coffee' },
+        { id: 'merry-mango-16', name: 'Merry Mango (16oz)', price: 99, category: 'non-coffee' },
+        { id: 'double-choco-float-12', name: 'Double Chocolate Float (12oz)', price: 120, category: 'non-coffee' },
+        { id: 'double-choco-float-16', name: 'Double Chocolate Float (16oz)', price: 145, category: 'non-coffee' },
+
+        // ESPRESSO BASED
+        { id: 'americano-12', name: 'Americano (12oz)', price: 80, category: 'espresso' },
+        { id: 'americano-16', name: 'Americano (16oz)', price: 95, category: 'espresso' },
+        { id: 'latte-12', name: 'Latte (12oz)', price: 120, category: 'espresso' },
+        { id: 'latte-16', name: 'Latte (16oz)', price: 135, category: 'espresso' },
+        { id: 'vanilla-latte-12', name: 'Vanilla Latte (12oz)', price: 120, category: 'espresso' },
+        { id: 'vanilla-latte-16', name: 'Vanilla Latte (16oz)', price: 135, category: 'espresso' },
+        { id: 'caramel-latte-12', name: 'Caramel Latte (12oz)', price: 130, category: 'espresso' },
+        { id: 'caramel-latte-16', name: 'Caramel Latte (16oz)', price: 145, category: 'espresso' },
+        { id: 'hazelnut-12', name: 'Hazelnut (12oz)', price: 120, category: 'espresso' },
+        { id: 'hazelnut-16', name: 'Hazelnut (16oz)', price: 135, category: 'espresso' },
+        { id: 'almond-12', name: 'Almond (12oz)', price: 120, category: 'espresso' },
+        { id: 'almond-16', name: 'Almond (16oz)', price: 135, category: 'espresso' },
+        { id: 'spanish-latte-12', name: 'Spanish Latte (12oz)', price: 110, category: 'espresso' },
+        { id: 'spanish-latte-16', name: 'Spanish Latte (16oz)', price: 130, category: 'espresso' },
+        { id: 'salted-caramel-12', name: 'Salted Caramel (12oz)', price: 120, category: 'espresso' },
+        { id: 'salted-caramel-16', name: 'Salted Caramel (16oz)', price: 145, category: 'espresso' },
+
+        // SPECIALTY COFFEE
+        { id: 'peanut-cream-12', name: 'Peanut Cream (12oz)', price: 130, category: 'specialty-coffee' },
+        { id: 'peanut-cream-16', name: 'Peanut Cream (16oz)', price: 145, category: 'specialty-coffee' },
+        { id: 'tres-leches-12', name: 'Tres Leches (12oz)', price: 120, category: 'specialty-coffee' },
+        { id: 'tres-leches-16', name: 'Tres Leches (16oz)', price: 135, category: 'specialty-coffee' },
+        { id: 'dalgona-12', name: 'Dalgona (12oz)', price: 120, category: 'specialty-coffee' },
+        { id: 'dalgona-16', name: 'Dalgona (16oz)', price: 135, category: 'specialty-coffee' },
+        { id: 'sea-salt-latte-12', name: 'Sea Salt Latte (12oz)', price: 120, category: 'specialty-coffee' },
+        { id: 'sea-salt-latte-16', name: 'Sea Salt Latte (16oz)', price: 135, category: 'specialty-coffee' },
+        { id: 'white-mocha-12', name: 'White Mocha (12oz)', price: 130, category: 'specialty-coffee' },
+        { id: 'white-mocha-16', name: 'White Mocha (16oz)', price: 145, category: 'specialty-coffee' },
+        { id: 'coffee-float-12', name: 'Coffee Float (12oz)', price: 115, category: 'specialty-coffee' },
+        { id: 'coffee-float-16', name: 'Coffee Float (16oz)', price: 130, category: 'specialty-coffee' },
+        ];
+
+        // Global state
+        let activeCategory = 'coffee';
+        let cart = [];
+        let selectedPaymentMethod = '';
+
+        // DOM Elements
+        const productGrid = document.getElementById('productGrid');
+        const cartItems = document.getElementById('cartItems');
+        const cartBadge = document.getElementById('cartBadge');
+        const cartSummary = document.getElementById('cartSummary');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const paymentModal = document.getElementById('paymentModal');
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        const toast = document.getElementById('toast');
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            renderProducts();
+            updateCart();
+        });
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Category tabs
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    setActiveCategory(this.dataset.category);
+                });
+            });
+
+            // Checkout button
+            checkoutBtn.addEventListener('click', openPaymentModal);
+
+            // Payment methods
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.addEventListener('click', function() {
+                    selectPaymentMethod(this.dataset.method);
+                });
+            });
+
+            // Confirm payment
+            confirmPaymentBtn.addEventListener('click', processPayment);
+
+            // Modal overlay click to close
+            paymentModal.addEventListener('click', function(e) {
+                if (e.target === paymentModal) {
+                    closePaymentModal();
+                }
+            });
+        }
+
+        // Category Management
+        function setActiveCategory(category) {
+            activeCategory = category;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.category === category) {
+                    button.classList.add('active');
+                }
+            });
+            
+            renderProducts();
+        }
+
+        // Product Rendering
+        function renderProducts() {
+            const filteredProducts = products.filter(product => product.category === activeCategory);
+            
+            productGrid.innerHTML = filteredProducts.map(product => {
+                const priceDisplay = Number.isInteger(product.price) 
+                    ? `₱${product.price}` 
+                    : `₱${product.price.toFixed(2)}`;
+
+                return `
+                    <div class="product-card" id="espresso">
+                        <div class="product-info">
+                            <h3>${product.name}</h3>
+                            <div class="product-price">${priceDisplay}</div>
+                            <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
+                                ➕ Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Cart Management
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            
+            updateCart();
+            showToast(`${product.name} added to cart`);
+        }
+
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+            
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity = newQuantity;
+                updateCart();
+            }
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
+        }
+
+        function updateCart() {
+            // Update cart badge
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartBadge.textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
+
+            // Update cart items display
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+                cartSummary.style.display = 'none';
+                checkoutBtn.disabled = true;
+            } else {
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <div class="cart-item-price">₱${item.price} each</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>
+                                ➖
+                            </button>
+                            <span class="quantity">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity + 1})">
+                                ➕
+                            </button>
+                            <button class="remove-btn" onclick="removeFromCart('${item.id}')">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Update totals (no tax)
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+                document.getElementById('subtotal').textContent = `₱${subtotal}`;
+                document.getElementById('total').textContent = `₱${subtotal}`;
+
+                cartSummary.style.display = 'block';
+                checkoutBtn.disabled = false;
+            }
+        }
+
+        // Payment Modal
+        function openPaymentModal() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = subtotal * 1.08; // Including tax
+            
+            document.getElementById('modalTotal').textContent = `$${total.toFixed(2)}`;
+            paymentModal.classList.add('show');
+            selectedPaymentMethod = '';
+            confirmPaymentBtn.disabled = true;
+            
+            // Reset payment method selection
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.classList.remove('selected');
+            });
+        }
+
+        function closePaymentModal() {
+            paymentModal.classList.remove('show');
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Update UI
+            document.querySelectorAll('.payment-method').forEach(methodEl => {
+                methodEl.classList.remove('selected');
+                if (methodEl.dataset.method === method) {
+                    methodEl.classList.add('selected');
+                }
+            });
+            
+            confirmPaymentBtn.disabled = false;
+        }
+
+        function processPayment() {
+            if (!selectedPaymentMethod) {
+                showToast('Please select a payment method', 'error');
+                return;
+            }
+
+            confirmPaymentBtn.disabled = true;
+            confirmPaymentBtn.textContent = 'Processing...';
+
+            // Simulate payment processing
+            setTimeout(() => {
+                // Reset cart
+                cart = [];
+                updateCart();
+                
+                // Close modal
+                closePaymentModal();
+                
+                // Reset button
+                confirmPaymentBtn.disabled = false;
+                confirmPaymentBtn.textContent = 'Complete Payment';
+                
+                // Show success message
+                showToast('Payment successful! Order completed.', 'success');
+            }, 2000);
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = 'toast show';
+            
+            if (type === 'error') {
+                toast.style.background = '#dc3545';
+            } else {
+                toast.style.background = '#28a745';
+            }
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
