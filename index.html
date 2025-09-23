@@ -575,22 +575,40 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header fixed w-full z-50">
+    <header class="header fixed w-full z-50 ">
         <div class="header-content">
             <div class="logo-section">
                 <div class="logo">
                     <img src="./Screenshot_2025-09-04_230647-removebg-preview.png" alt="">
                 </div>
                 <div class="shop-info">
-                    <h1>PAPU COFFEE SHOP</h1>
+                    <h2>PAPU COFFEE SHOP</h2>
                     <p>Point of Sale System</p>
                 </div>
             </div>
-            <div class="header-meta">
-                <div>🕕 Open: 12:00 NN - 9:00 PM</div>
-            </div>
+                <div class="header-meta">
+                    <div>🕕 Open: 12:00 NN - 9:00 PM</div>
+                </div>
         </div>
     </header>
+
+    <div class="fixed bottom-4 right-4 z-50 lg:hidden">
+        <a href="#cart" class="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                width="28" height="28" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                class="lucide lucide-shopping-cart">
+            <circle cx="8" cy="21" r="1"/>
+            <circle cx="19" cy="21" r="1"/>
+            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+            </svg>
+        </a>
+    </div>
 
     <!-- Main Container -->
     <div class="main-container pt-[120px]">
@@ -598,7 +616,9 @@
         <div class="product-section">
             <!-- Category Tabs -->
             <div class="category-tabs">
-                <h3>Select Menu</h3>
+                <div class="w-full text-center mb-4">
+                    <h2>Select Menu</h2>
+                </div>
                 <div class="tab-buttons">
                     <button class="tab-button active" data-category="espresso">
                         ☕ Espresso Based
@@ -631,7 +651,7 @@
         </div>
 
         <!-- Shopping Cart -->
-        <div class="cart-section">
+        <div class="cart-section" id="cart">
     <div class="cart-header">
         <h2>🛒 Order Summary</h2>
         <span class="cart-badge" id="cartBadge">0 items</span>
@@ -660,10 +680,11 @@
                 placeholder="Enter cash amount" 
                 class="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
+            <span id="error" class="text-red-500 text-sm"></span>
         </div>
     </div>
     
-    <button class="checkout-btn" id="checkoutBtn" onclick="openPaymentModal()" disabled>
+    <button class="checkout-btn" id="checkoutBtn" onclick="submit()" disabled>
         Proceed to Payment
     </button>
 </div>
@@ -676,6 +697,7 @@
             <div class="modal-header">
                 <h3>✅ Complete Payment</h3>
                 <p>Total amount: <span class="modal-total" id="modalTotal">$0.00</span></p>
+                <p>Change: <span id="change">$0.00</span></p>
             </div>
             
             <div class="payment-methods">
@@ -788,7 +810,6 @@
         const cartBadge = document.getElementById('cartBadge');
         const cartSummary = document.getElementById('cartSummary');
         const checkoutBtn = document.getElementById('checkoutBtn');
-        const paymentModal = document.getElementById('paymentModal');
         const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
         const toast = document.getElementById('toast');
 
@@ -807,9 +828,6 @@
                     setActiveCategory(this.dataset.category);
                 });
             });
-
-            // Checkout button
-            checkoutBtn.addEventListener('click', openPaymentModal);
 
             // Payment methods
             document.querySelectorAll('.payment-method').forEach(method => {
@@ -936,7 +954,7 @@
 
                 // Update totals (no tax)
                 const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
+                
                 document.getElementById('subtotal').textContent = `₱${subtotal}`;
                 document.getElementById('total').textContent = `₱${subtotal}`;
 
@@ -946,11 +964,35 @@
         }
 
         // Payment Modal
+        
+
+        function submit() {
+            const cashInput = document.getElementById("cashInput").value.trim();
+            const cash = parseFloat(cashInput);
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            if (cashInput === "" || isNaN(cash) || cash <= 0) {
+                document.getElementById("error").innerHTML = "⚠️ Please enter a valid cash amount";
+                return;
+            } else if (cash < subtotal) {
+                document.getElementById("error").innerHTML = "⚠️ Cash is not enough to cover the total";
+                return;
+            } else {
+                document.getElementById("error").innerHTML = ""; // clear error
+                openPaymentModal(cash);
+            }
+        }
+
         function openPaymentModal() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const total = subtotal * 1.08; // Including tax
-            
-            document.getElementById('modalTotal').textContent = `$${total.toFixed(2)}`;
+
+            const cashInput = document.getElementById("cashInput").value;
+            const change =  cashInput - subtotal;
+
+
+            document.getElementById('change').textContent = `₱${change}`;
+
+            document.getElementById('modalTotal').textContent = `$${subtotal.toFixed(2)}`;
             paymentModal.classList.add('show');
             selectedPaymentMethod = '';
             confirmPaymentBtn.disabled = true;
