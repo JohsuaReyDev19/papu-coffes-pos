@@ -1069,7 +1069,8 @@
 
             confirmPaymentBtn.disabled = true;
             confirmPaymentBtn.textContent = 'Processing...';
-
+            document.getElementById("name").innerHTML = '';
+            document.getElementById("cashInput").innerHTML = '';
             // Simulate payment processing
             setTimeout(() => {
                 // Reset cart
