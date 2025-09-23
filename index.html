@@ -617,10 +617,10 @@
             <!-- Category Tabs -->
             <div class="category-tabs">
                 <div class="w-full text-center mb-4">
-                    <h2>Select Menu</h2>
+                    <h2 class="text-lg">Select Menu</h2>
                 </div>
                 <div class="tab-buttons">
-                    <button class="tab-button active" data-category="espresso">
+                    <button class="tab-button" data-category="espresso">
                         ☕ Espresso Based
                     </button>
                     <button class="tab-button" data-category="specialty-coffee">
@@ -654,6 +654,11 @@
         <div class="cart-section" id="cart">
     <div class="cart-header">
         <h2>🛒 Order Summary</h2>
+        <div>
+            <span id="openOrderHistory" class="text-blue-500 text-sm cursor-pointer">view all order-></span>
+        </div>
+    </div>
+    <div class="mb-3 text-right">
         <span class="cart-badge" id="cartBadge">0 items</span>
     </div>
     
@@ -682,6 +687,17 @@
             >
             <span id="error" class="text-red-500 text-sm"></span>
         </div>
+        <div>
+            <label for="cashInput" class="block text-sm font-medium text-gray-700 mb-1">
+                Sold to:
+            </label>
+            <input 
+                type="text" 
+                id="name" 
+                placeholder="Enter name customer"
+                class="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+        </div>
     </div>
     
     <button class="checkout-btn" id="checkoutBtn" onclick="submit()" disabled>
@@ -696,6 +712,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>✅ Complete Payment</h3>
+                <p>Sold to: <span id="soldTo"></span></p>
                 <p>Total amount: <span class="modal-total" id="modalTotal">$0.00</span></p>
                 <p>Change: <span id="change">$0.00</span></p>
             </div>
@@ -718,6 +735,27 @@
         </div>
     </div>
 
+    <!-- Order History Modal -->
+    <div id="orderHistoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white w-96 lg:w-[800px] max-h-[80vh] rounded-lg shadow-lg p-6 overflow-y-auto">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-bold">📋 Order History</h2>
+            <button id="closeOrderHistory" class="text-gray-600 hover:text-red-500 text-xl">&times;</button>
+            </div>
+
+            <!-- Order List -->
+            <ul id="orderHistory" class="space-y-3 text-sm">
+            <li class="text-gray-500">No orders yet</li>
+            </ul>
+
+            <!-- Total Sales -->
+            <div class="summary-line mt-4 font-semibold flex justify-between border-t pt-2">
+            <span>Total Sales:</span>
+            <span id="totalSales">₱0.00</span>
+            </div>
+        </div>
+    </div>
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
@@ -987,12 +1025,14 @@
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
             const cashInput = document.getElementById("cashInput").value;
+            const name = document.getElementById("name").value;
+            document.getElementById("soldTo").innerHTML = name;
             const change =  cashInput - subtotal;
 
 
             document.getElementById('change').textContent = `₱${change}`;
 
-            document.getElementById('modalTotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('modalTotal').textContent = `₱${subtotal.toFixed(2)}`;
             paymentModal.classList.add('show');
             selectedPaymentMethod = '';
             confirmPaymentBtn.disabled = true;
@@ -1063,6 +1103,129 @@
                 toast.classList.remove('show');
             }, 3000);
         }
+
+        let orderHistory = []; // store past orders
+        let totalSales = 0;
+
+        // Confirm Payment
+        confirmPaymentBtn.addEventListener("click", function() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const name = document.getElementById("name").value || "Walk-in";
+
+            // Save order
+            const newOrder = {
+                customer: name,
+                amount: subtotal,
+                items: [...cart], // copy of cart items
+                time: new Date().toLocaleString()
+            };
+            orderHistory.push(newOrder);
+
+            // Update total sales
+            totalSales += subtotal;
+
+            // Update display
+            renderOrderHistory();
+
+            // Reset cart
+            cart = [];
+            updateCart();
+            closePaymentModal();
+
+            alert("✅ Payment complete!");
+        });
+
+        // Save to localStorage
+        function saveData() {
+        localStorage.setItem("orderHistory", JSON.stringify(orderHistory));
+        localStorage.setItem("totalSales", totalSales.toString());
+        localStorage.setItem("savedDate", new Date().toLocaleDateString()); // save today's date
+        }
+
+        // Load from localStorage
+        function loadData() {
+        const savedDate = localStorage.getItem("savedDate");
+        const today = new Date().toLocaleDateString();
+
+        // If date is different -> reset
+        if (savedDate !== today) {
+            localStorage.removeItem("orderHistory");
+            localStorage.removeItem("totalSales");
+            orderHistory = [];
+            totalSales = 0;
+            saveData(); // save fresh data for today
+            renderOrderHistory();
+            return;
+        }
+
+        // Otherwise load old data
+        const savedHistory = localStorage.getItem("orderHistory");
+        const savedSales = localStorage.getItem("totalSales");
+
+        if (savedHistory) {
+            orderHistory = JSON.parse(savedHistory);
+        }
+        if (savedSales) {
+            totalSales = parseFloat(savedSales);
+        }
+        renderOrderHistory();
+        }
+
+        function renderOrderHistory() {
+        const historyEl = document.getElementById("orderHistory");
+        const salesEl = document.getElementById("totalSales");
+
+        if (orderHistory.length === 0) {
+            historyEl.innerHTML = `<li class="text-gray-500">No orders yet</li>`;
+        } else {
+            historyEl.innerHTML = orderHistory.map(order => `
+            <li class="p-3 border rounded bg-gray-50">
+                <div class="font-bold">${order.customer}</div>
+                <div class="text-xs text-gray-500">${order.time}</div>
+                <ul class="mt-2 text-sm list-disc list-inside">
+                ${order.items.map(item => `
+                    <li>${item.name} x${item.quantity} - ₱${(item.price * item.quantity).toFixed(2)}</li>
+                `).join("")}
+                </ul>
+                <div class="mt-2 font-semibold text-right">Total: ₱${order.amount.toFixed(2)}</div>
+            </li>
+            `).join("");
+        }
+
+        salesEl.textContent = `₱${totalSales.toFixed(2)}`;
+
+        // Save every time we update
+        saveData();
+        }
+
+        // When page loads
+        window.addEventListener("load", () => {
+        loadData();
+        });
+
+
+        const openOrderHistoryBtn = document.getElementById("openOrderHistory");
+        const closeOrderHistoryBtn = document.getElementById("closeOrderHistory");
+        const orderHistoryModal = document.getElementById("orderHistoryModal");
+
+        // Open modal
+        openOrderHistoryBtn.addEventListener("click", () => {
+        orderHistoryModal.classList.remove("hidden");
+        });
+
+        // Close modal
+        closeOrderHistoryBtn.addEventListener("click", () => {
+        orderHistoryModal.classList.add("hidden");
+        });
+
+        // Close modal when clicking outside
+        orderHistoryModal.addEventListener("click", (e) => {
+        if (e.target === orderHistoryModal) {
+            orderHistoryModal.classList.add("hidden");
+        }
+        });
+
+
     </script>
 </body>
 </html>
