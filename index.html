@@ -1086,7 +1086,7 @@
                 
                 // Show success message
                 showToast('Payment successful! Order completed.', 'success');
-            }, 2000);
+            }, 1000);
         }
 
         // Toast Notifications
@@ -1102,7 +1102,7 @@
 
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 1000);
         }
 
         let orderHistory = []; // store past orders
@@ -1132,8 +1132,6 @@
             cart = [];
             updateCart();
             closePaymentModal();
-
-            alert("✅ Payment complete!");
         });
 
         // Save to localStorage
